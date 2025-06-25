@@ -17,6 +17,7 @@
       <tr>
         <th>日付</th>
         <th>社員名</th>
+        <th>社員番号</th> <!-- 👈 追加 -->
         <th>出勤時間</th>
         <th>退勤時間</th>
       </tr>
@@ -26,7 +27,6 @@
     </tbody>
   </table>
 
-  <!-- 🔽 この位置に貼ってOK -->
   <script>
   const correctPassword = "0000"; // パスワード設定
 
@@ -49,8 +49,16 @@
         const grouped = {};
         for (const record of data) {
           const date = new Date(record["日付"]).toLocaleDateString("ja-JP");
-          const key = `${date}_${record["社員名"]}`;
-          if (!grouped[key]) grouped[key] = { date, name: record["社員名"], 出勤: "", 退勤: "" };
+          const key = `${date}_${record["社員名"]}_${record["社員番号"]}`;
+          if (!grouped[key]) {
+            grouped[key] = {
+              date,
+              name: record["社員名"],
+              id: record["社員番号"], // 👈 追加
+              出勤: "",
+              退勤: ""
+            };
+          }
 
           const timeObj = new Date(record["時刻"]);
           const time = timeObj.getHours().toString().padStart(2, "0") + ":" +
@@ -63,12 +71,12 @@
         const table = document.getElementById("logTable");
         Object.values(grouped).forEach(row => {
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${row.date}</td><td>${row.name}</td><td>${row.出勤}</td><td>${row.退勤}</td>`;
+          tr.innerHTML = `<td>${row.date}</td><td>${row.name}</td><td>${row.id}</td><td>${row.出勤}</td><td>${row.退勤}</td>`;
           table.appendChild(tr);
         });
       })
       .catch(err => console.error("取得エラー:", err));
   }
-</script>
+  </script>
 </body>
 </html>
