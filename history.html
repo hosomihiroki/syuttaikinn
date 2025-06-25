@@ -40,7 +40,9 @@
 
           if (!grouped[key]) grouped[key] = { date, name: record.name, 出勤: "", 退勤: "" };
 
-          const time = new Date(record.time).toLocaleTimeString("ja-JP", { hour: '2-digit', minute: '2-digit' });
+          const timeObj = new Date(item.time);
+const time = timeObj.getHours().toString().padStart(2, "0") + ":" +
+              timeObj.getMinutes().toString().padStart(2, "0");
           if (record.status === "出勤") grouped[key].出勤 = time;
           if (record.status === "退勤") grouped[key].退勤 = time;
         }
