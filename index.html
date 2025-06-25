@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>出退勤管理アプリ</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 100px; }
+    input, button { font-size: 1.2em; padding: 10px; margin: 10px; }
+  </style>
+</head>
+<body>
+  <h1>出退勤管理</h1>
+  <input type="text" id="employeeId" placeholder="社員番号を入力">
+  <br>
+  <button id="punchBtn">出勤</button>
+
+<script>
+  // 🔽 状態をローカルストレージから読み込み
+  function saveStatus(isWorking) {
+    localStorage.setItem("isWorking", isWorking ? "1" : "0");
+  }
+
+  function loadStatus() {
+    return localStorage.getItem("isWorking") === "1";
+  }
+
+  let isWorking = loadStatus(); // ← 状態を復元
+  document.getElementById("punchBtn").textContent = isWorking ? "退勤" : "出勤";
+
+  async function getEmployeeNameFromSheet(id) {
+    const url = `https://script.google.com/macros/s/AKfycbwIaHxvdk4iUDFAL6DfyB5F5wr3DiARYCc27vTKsj8TNFx8iksIGTZjEmqo0n0rSLsrXA/exec?id=${id}`;
+    const res = await fetch(url);
+    return await res.text();
+  }
+
+  document.getElementById("punchBtn").addEventListener("click", async function () {
+    const id = document.getElementById("employeeId").value.trim();
+    if (!id) {
+      alert("社員番号を入力してください");
+      return;
+    }
+
+    const status = isWorking ? "退勤" : "出勤";
+    const now = new Date();
+    const dateStr = now.toLocaleDateString();
+    const timeStr = now.toLocaleTimeString();
+    const week = ["日", "月", "火", "水", "木", "金", "土"];
+    const weekday = week[now.getDay()];
+
+    const name = await getEmployeeNameFromSheet(id);
+
+    alert(
+      `✅ 打刻完了\n\n` +
+      `👤 社員名: ${name}\n` +
+      `🆔 社員番号: ${id}\n` +
+      `📌 ステータス: ${status}\n` +
+      `📅 日付: ${dateStr}（${weekday}曜日）\n` +
+      `⏰ 時刻: ${timeStr}`
+    );
+
+    // 🔽 スプレッドシートに保存
+    fetch("https://script.google.com/macros/s/AKfycbwIaHxvdk4iUDFAL6DfyB5F5wr3DiARYCc27vTKsj8TNFx8iksIGTZjEmqo0n0rSLsrXA/exec", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        date: dateStr,
+        time: timeStr,
+        status: status,
+        id: id,
+        name: name
+      })
+    });
+
+    isWorking = !isWorking;
+    this.textContent = isWorking ? "退勤" : "出勤";
+    saveStatus(isWorking); // ← ここで状態を保存！
+  });
+</script>
+</body>
+</html>
