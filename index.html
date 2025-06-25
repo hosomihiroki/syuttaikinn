@@ -42,9 +42,23 @@
   <br>
   <button id="punchBtn">出勤</button>
 
-  <a href="admin.html" target="_blank">🔒 管理者用：出退勤履歴を見る</a>
+  <a href="admin.html" target="_blank">🔒管理者用</a>
 
   <script>
+    // ページ読み込み時に保存された社員番号を復元
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedId = localStorage.getItem("lastEmployeeId");
+      if (savedId) {
+        document.getElementById("employeeId").value = savedId;
+      }
+    });
+
+    // 入力時に社員番号を保存
+    document.getElementById("employeeId").addEventListener("input", () => {
+      const id = document.getElementById("employeeId").value.trim();
+      localStorage.setItem("lastEmployeeId", id);
+    });
+
     function saveStatus(isWorking) {
       localStorage.setItem("isWorking", isWorking ? "1" : "0");
     }
