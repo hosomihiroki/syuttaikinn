@@ -77,45 +77,51 @@
     }
 
     document.getElementById("punchBtn").addEventListener("click", async function () {
-      const id = document.getElementById("employeeId").value.trim();
-      if (!id) {
-        alert("社員番号を入力してください");
-        return;
-      }
+  const button = this;
+  button.disabled = true; // 🔒 ボタンを一時的に無効化
 
-      const status = isWorking ? "退勤" : "出勤";
-      const now = new Date();
-      const dateStr = now.toLocaleDateString();
-      const timeStr = now.toLocaleTimeString();
-      const week = ["日", "月", "火", "水", "木", "金", "土"];
-      const weekday = week[now.getDay()];
-      const name = await getEmployeeNameFromSheet(id);
+  const id = document.getElementById("employeeId").value.trim();
+  if (!id) {
+    alert("社員番号を入力してください");
+    button.disabled = false; // 🔓 入力エラー時に復帰
+    return;
+  }
 
-      alert(
-        `✅ 打刻完了\n\n` +
-        `👤 社員名: ${name}\n` +
-        `🆔 社員番号: ${id}\n` +
-        `📌 ステータス: ${status}\n` +
-        `📅 日付: ${dateStr}（${weekday}曜日）\n` +
-        `⏰ 時刻: ${timeStr}`
-      );
+  const status = isWorking ? "退勤" : "出勤";
+  const now = new Date();
+  const dateStr = now.toLocaleDateString();
+  const timeStr = now.toLocaleTimeString();
+  const week = ["日", "月", "火", "水", "木", "金", "土"];
+  const weekday = week[now.getDay()];
+  const name = await getEmployeeNameFromSheet(id);
 
-      fetch("https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          date: dateStr,
-          time: timeStr,
-          status: status,
-          id: id,
-          name: name
-        })
-      });
+  alert(
+    `✅ 打刻完了\n\n` +
+    `👤 社員名: ${name}\n` +
+    `🆔 社員番号: ${id}\n` +
+    `📌 ステータス: ${status}\n` +
+    `📅 日付: ${dateStr}（${weekday}曜日）\n` +
+    `⏰ 時刻: ${timeStr}`
+  );
 
-      isWorking = !isWorking;
-      this.textContent = isWorking ? "退勤" : "出勤";
-      saveStatus(isWorking);
-    });
+  await fetch("https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      date: dateStr,
+      time: timeStr,
+      status: status,
+      id: id,
+      name: name
+    })
+  });
+
+  isWorking = !isWorking;
+  button.textContent = isWorking ? "退勤" : "出勤";
+  saveStatus(isWorking);
+
+  button.disabled = false; // 🔓 最後にボタン復帰
+});
   </script>
 </body>
 </html>
