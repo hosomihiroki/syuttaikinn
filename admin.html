@@ -12,6 +12,10 @@
 </head>
 <body>
   <h1>出退勤履歴一覧</h1>
+  <div id="authArea">
+  <input type="password" id="pwInput" placeholder="パスワードを入力" inputmode="numeric" pattern="[0-9]*">
+  <button id="pwSubmit">確認</button>
+</div>
   <table>
     <thead>
       <tr>
@@ -30,41 +34,50 @@
 <script>
   const correctPassword = "0000"; // ←ここに好きなパスワード設定！
 
-  const pw = prompt("🔐 管理パスワードを入力してください");
-  if (pw !== correctPassword) {
-    alert("パスワードが違います❌");
-    document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px;'>アクセス拒否</h2>";
-    throw new Error("認証失敗");
+  <script>
+  const correctPassword = "0000"; // 好きなパスワードに変えてOK
+
+  document.getElementById("pwSubmit").addEventListener("click", () => {
+    const pw = document.getElementById("pwInput").value.trim();
+    if (pw !== correctPassword) {
+      alert("パスワードが違います❌");
+      return;
+    }
+    document.getElementById("authArea").style.display = "none";
+
+    // ログイン成功後に履歴を表示
+    loadHistory();
+  });
+
+  function loadHistory() {
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec?mode=logs";
+
+    fetch(scriptURL)
+      .then(res => res.json())
+      .then(data => {
+        const grouped = {};
+        for (const record of data) {
+          const date = new Date(record["日付"]).toLocaleDateString("ja-JP");
+          const key = `${date}_${record["社員名"]}`;
+          if (!grouped[key]) grouped[key] = { date, name: record["社員名"], 出勤: "", 退勤: "" };
+
+          const timeObj = new Date(record["時刻"]);
+          const time = timeObj.getHours().toString().padStart(2, "0") + ":" +
+                       timeObj.getMinutes().toString().padStart(2, "0");
+
+          if (record["ステータス"] === "出勤") grouped[key].出勤 = time;
+          if (record["ステータス"] === "退勤") grouped[key].退勤 = time;
+        }
+
+        const table = document.getElementById("logTable");
+        Object.values(grouped).forEach(row => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${row.date}</td><td>${row.name}</td><td>${row.出勤}</td><td>${row.退勤}</td>`;
+          table.appendChild(tr);
+        });
+      })
+      .catch(err => console.error("取得エラー:", err));
   }
-document.addEventListener("DOMContentLoaded", () => {
-  const scriptURL = "https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec?mode=logs";
-
-  fetch(scriptURL)
-    .then(res => res.json())
-    .then(data => {
-      const grouped = {};
-      for (const record of data) {
-        const date = new Date(record["日付"]).toLocaleDateString("ja-JP");
-        const key = `${date}_${record["社員名"]}`;
-        if (!grouped[key]) grouped[key] = { date, name: record["社員名"], 出勤: "", 退勤: "" };
-
-        const timeObj = new Date(record["時刻"]);
-        const time = timeObj.getHours().toString().padStart(2, "0") + ":" +
-                     timeObj.getMinutes().toString().padStart(2, "0");
-
-        if (record["ステータス"] === "出勤") grouped[key].出勤 = time;
-        if (record["ステータス"] === "退勤") grouped[key].退勤 = time;
-      }
-
-      const table = document.getElementById("logTable");
-      Object.values(grouped).forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${row.date}</td><td>${row.name}</td><td>${row.出勤}</td><td>${row.退勤}</td>`;
-        table.appendChild(tr);
-      });
-    })
-    .catch(err => console.error("取得エラー:", err));
-});
 </script>
 </body>
 </html>
