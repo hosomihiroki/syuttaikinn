@@ -1,15 +1,14 @@
 <script>
+document.addEventListener("DOMContentLoaded", () => {
   const scriptURL = "https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec?mode=logs";
 
   fetch(scriptURL)
     .then(res => res.json())
     .then(data => {
       const grouped = {};
-
       for (const record of data) {
         const date = new Date(record.date).toLocaleDateString("ja-JP");
         const key = `${date}_${record.name}`;
-
         if (!grouped[key]) grouped[key] = { date, name: record.name, 出勤: "", 退勤: "" };
 
         const timeObj = new Date(record.time);
@@ -27,7 +26,6 @@
         table.appendChild(tr);
       });
     })
-    .catch(err => {
-      console.error("取得エラー:", err);
-    });
+    .catch(err => console.error("取得エラー:", err));
+});
 </script>
