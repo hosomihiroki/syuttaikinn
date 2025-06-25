@@ -27,36 +27,36 @@
   </table>
 
   <!-- 🔽 この位置に貼ってOK -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const scriptURL = "https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec?mode=logs";
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const scriptURL = "https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec?mode=logs";
 
-      fetch(scriptURL)
-        .then(res => res.json())
-        .then(data => {
-          const grouped = {};
-          for (const record of data) {
-            const date = new Date(record.date).toLocaleDateString("ja-JP");
-            const key = `${date}_${record.name}`;
-            if (!grouped[key]) grouped[key] = { date, name: record.name, 出勤: "", 退勤: "" };
+  fetch(scriptURL)
+    .then(res => res.json())
+    .then(data => {
+      const grouped = {};
+      for (const record of data) {
+        const date = new Date(record["日付"]).toLocaleDateString("ja-JP");
+        const key = `${date}_${record["社員名"]}`;
+        if (!grouped[key]) grouped[key] = { date, name: record["社員名"], 出勤: "", 退勤: "" };
 
-            const timeObj = new Date(record.time);
-            const time = timeObj.getHours().toString().padStart(2, "0") + ":" +
-                        timeObj.getMinutes().toString().padStart(2, "0");
+        const timeObj = new Date(record["時刻"]);
+        const time = timeObj.getHours().toString().padStart(2, "0") + ":" +
+                     timeObj.getMinutes().toString().padStart(2, "0");
 
-            if (record.status === "出勤") grouped[key].出勤 = time;
-            if (record.status === "退勤") grouped[key].退勤 = time;
-          }
+        if (record["ステータス"] === "出勤") grouped[key].出勤 = time;
+        if (record["ステータス"] === "退勤") grouped[key].退勤 = time;
+      }
 
-          const table = document.getElementById("logTable");
-          Object.values(grouped).forEach(row => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${row.date}</td><td>${row.name}</td><td>${row.出勤}</td><td>${row.退勤}</td>`;
-            table.appendChild(tr);
-          });
-        })
-        .catch(err => console.error("取得エラー:", err));
-    });
-  </script>
+      const table = document.getElementById("logTable");
+      Object.values(grouped).forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.date}</td><td>${row.name}</td><td>${row.出勤}</td><td>${row.退勤}</td>`;
+        table.appendChild(tr);
+      });
+    })
+    .catch(err => console.error("取得エラー:", err));
+});
+</script>
 </body>
 </html>
