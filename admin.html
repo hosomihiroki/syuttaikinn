@@ -32,19 +32,17 @@
 
   <!-- 🔽 この位置に貼ってOK -->
   <script>
-  const correctPassword = "0000"; // 好きなパスワードに変えてOK
+  const correctPassword = "0000"; // パスワード設定
 
-  document.getElementById("pwSubmit").addEventListener("click", () => {
-    const pw = document.getElementById("pwInput").value.trim();
-    if (pw !== correctPassword) {
-      alert("パスワードが違います❌");
-      return;
-    }
-    document.getElementById("authArea").style.display = "none";
+  const pw = prompt("🔐 管理パスワードを入力してください");
+  if (pw !== correctPassword) {
+    alert("パスワードが違います❌");
+    document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px;'>アクセス拒否</h2>";
+    throw new Error("認証失敗");
+  }
 
-    // ログイン成功後に履歴を表示
-    loadHistory();
-  });
+  // 認証成功時に履歴読み込み
+  loadHistory();
 
   function loadHistory() {
     const scriptURL = "https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec?mode=logs";
