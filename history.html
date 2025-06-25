@@ -1,31 +1,62 @@
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const scriptURL = "https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec?mode=logs";
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>出退勤履歴一覧</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <h1>出退勤履歴一覧</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>日付</th>
+        <th>社員名</th>
+        <th>出勤時間</th>
+        <th>退勤時間</th>
+      </tr>
+    </thead>
+    <tbody id="logTable">
+      <!-- データがここに入る -->
+    </tbody>
+  </table>
 
-  fetch(scriptURL)
-    .then(res => res.json())
-    .then(data => {
-      const grouped = {};
-      for (const record of data) {
-        const date = new Date(record.date).toLocaleDateString("ja-JP");
-        const key = `${date}_${record.name}`;
-        if (!grouped[key]) grouped[key] = { date, name: record.name, 出勤: "", 退勤: "" };
+  <!-- 🔽 この位置に貼ってOK -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const scriptURL = "https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec?mode=logs";
 
-        const timeObj = new Date(record.time);
-        const time = timeObj.getHours().toString().padStart(2, "0") + ":" +
-                     timeObj.getMinutes().toString().padStart(2, "0");
+      fetch(scriptURL)
+        .then(res => res.json())
+        .then(data => {
+          const grouped = {};
+          for (const record of data) {
+            const date = new Date(record.date).toLocaleDateString("ja-JP");
+            const key = `${date}_${record.name}`;
+            if (!grouped[key]) grouped[key] = { date, name: record.name, 出勤: "", 退勤: "" };
 
-        if (record.status === "出勤") grouped[key].出勤 = time;
-        if (record.status === "退勤") grouped[key].退勤 = time;
-      }
+            const timeObj = new Date(record.time);
+            const time = timeObj.getHours().toString().padStart(2, "0") + ":" +
+                        timeObj.getMinutes().toString().padStart(2, "0");
 
-      const table = document.getElementById("logTable");
-      Object.values(grouped).forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${row.date}</td><td>${row.name}</td><td>${row.出勤}</td><td>${row.退勤}</td>`;
-        table.appendChild(tr);
-      });
-    })
-    .catch(err => console.error("取得エラー:", err));
-});
-</script>
+            if (record.status === "出勤") grouped[key].出勤 = time;
+            if (record.status === "退勤") grouped[key].退勤 = time;
+          }
+
+          const table = document.getElementById("logTable");
+          Object.values(grouped).forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${row.date}</td><td>${row.name}</td><td>${row.出勤}</td><td>${row.退勤}</td>`;
+            table.appendChild(tr);
+          });
+        })
+        .catch(err => console.error("取得エラー:", err));
+    });
+  </script>
+</body>
+</html>
