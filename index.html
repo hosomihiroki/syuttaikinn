@@ -71,7 +71,7 @@
     document.getElementById("punchBtn").textContent = isWorking ? "退勤" : "出勤";
 
     async function getEmployeeNameFromSheet(id) {
-      const url = `https://script.google.com/macros/s/AKfycbzspYwO9jU7_4PsoJa69QWEHtc5S6XRljjlhsJs7hY23cm09gLvL_RNaF1rlRlJTSt7jQ/exec?mode=name&id=${id}`;
+      const url = `https://script.google.com/macros/s/AKfycbxosSIDD83ai3hBCh0slGaHPbhkBI0l0Kcpohtm9N827Vnt1nVoNLxwEMKkxd7Edjh1YA/exec?mode=name&id=${id}`;
       const res = await fetch(url);
       return await res.text();
     }
